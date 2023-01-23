@@ -116,9 +116,14 @@ return points;
 }*/
 bool start = false;
 float speed = 0;
+float anglespeed;
+bool rota = false;
 
 bool start2 = false;
 float speed2 = 0;
+float angle2 = 0;
+float anglespeed2;
+bool rota2 = false;
 
 void SpecialKeyFunc(int Key, int x, int y)
 {
@@ -126,29 +131,10 @@ void SpecialKeyFunc(int Key, int x, int y)
     case GLUT_KEY_UP:
 
         // ct += 0.02;
+        rota = true;
         start = true;
         speed += 0.001;
-        glutPostRedisplay();
-
-        break;
-    case GLUT_KEY_DOWN:
-
-        // ct += 0.02;
-        if (speed >= 0)
-            speed -= 0.001;
-
-        if (speed < 0.0001)
-            start = false;
-
-        glutPostRedisplay();
-
-        break;
-    case GLUT_KEY_F1:
-
-        speed = 0;
-        ct = 0;
-        start = false;
-
+        anglespeed += 0.09;
         glutPostRedisplay();
 
         break;
@@ -156,19 +142,69 @@ void SpecialKeyFunc(int Key, int x, int y)
     case GLUT_KEY_RIGHT:
 
         // ct += 0.02;
+        rota2 = true;
         start2 = true;
         speed2 += 0.001;
+        anglespeed2 += 0.09;
         glutPostRedisplay();
 
         break;
+
+    case GLUT_KEY_DOWN:
+
+        // ct += 0.02;
+        if (speed >= 0)
+        {
+            speed -= 0.001;
+            anglespeed -= 0.09;
+        }
+        if (speed < 0.0001)
+        {
+            start = false;
+            rota = false;
+        }
+
+        glutPostRedisplay();
+
+        break;
+
     case GLUT_KEY_LEFT:
 
         // ct += 0.02;
         if (speed2 >= 0)
+        {
             speed2 -= 0.001;
-
+            anglespeed2 -= 0.09;
+        }
         if (speed2 < 0.0001)
+        {
             start2 = false;
+            rota2 = false;
+        }
+
+        glutPostRedisplay();
+
+        break;
+
+    case GLUT_KEY_F1:
+
+        speed = 0;
+        ct = 0;
+        start = false;
+        rota = false;
+        anglespeed = 0;
+
+        if (counts == 0)
+            angle = 0;
+
+        if (counts == 2)
+            angle = -90;
+
+        if (counts == 3)
+            angle = -180;
+
+        if (counts == 5)
+            angle = -270;
 
         glutPostRedisplay();
 
@@ -179,6 +215,20 @@ void SpecialKeyFunc(int Key, int x, int y)
         speed2 = 0;
         ct2 = 0;
         start2 = false;
+        rota2 = false;
+        anglespeed2 = 0;
+
+        if (counts2 == 0)
+            angle2 = 0;
+
+        if (counts2 == 2)
+            angle2 = -90;
+
+        if (counts2 == 3)
+            angle2 = -180;
+
+        if (counts2 == 5)
+            angle2 = -270;
 
         glutPostRedisplay();
 
@@ -351,7 +401,7 @@ void display() {
 
 
 //Konrad Matusewicz///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
 
     if (start)
     {
@@ -370,13 +420,18 @@ void display() {
     if (counts > 5)
         counts = 0;
 
+    if (rota)
+    {
+        if (ct < 1)
+            angle -= 0.18 + anglespeed;
+    }
+
 
     //glLoadIdentity();
     if (counts == 0)
     {
         bt = bezierPointspanitik(ct, ctrlpoints9);
-        if (ct > 0)
-            angle -= 0.7;
+   
 
         if (speed > 0.025)
         {
@@ -388,14 +443,22 @@ void display() {
     }
 
 
-
     if (counts == 1)
+    {
         bt = bezierPointspanitik(ct, ctrlpoints10);
+        rota = false;
+    }
 
 
     if (counts == 2)
     {
         bt = bezierPointspanitik(ct, ctrlpoints11);
+        rota = true;
+
+        if (speed == 0)
+        {
+            rota = false;
+        }
 
         if (speed > 0.025)
         {
@@ -411,7 +474,12 @@ void display() {
     if (counts == 3)
     {
         bt = bezierPointspanitik(ct, ctrlpoints12);
-   
+        rota = true;
+
+        if (speed == 0)
+        {
+            rota = false;
+        }
         if (speed > 0.025)
         {
             //bt.x = bt.x - 12;
@@ -422,21 +490,30 @@ void display() {
     }
 
     if (counts == 4)
+    {
         bt = bezierPointspanitik(ct, ctrlpoints121);
+        rota = false;
+    }
 
     if (counts == 5)
     {
         bt = bezierPointspanitik(ct, ctrlpoints122);
+        rota = true;
+
+        if (speed == 0)
+        {
+            rota = false;
+        }
         if (speed > 0.025)
         {
             bt.x = bt.x + 12;
             //bt.y = bt.y + 5;
             start = false;
-           
+
         }
     }
 
-   
+
 
 
     x = bt.x;
@@ -445,42 +522,47 @@ void display() {
     cout << bt.x << "," << bt.y << "," << bt.z << endl;
     glTranslatef(x, y, z);
     glRotatef(angle, 0, 0, 1);
-    glColor3f(0.0, 1.0, 0.0);
+    glColor3f(0.5, 0.0, 0.0);
 
 
     //Auto
     glBegin(GL_QUADS);
     //Rumpf
-    glVertex2f(-1.5,  -2);
+    glVertex2f(-1.5, -2);
     glVertex2f(-1.5, 2.3);
-    glVertex2f( 1.5, 2.3);
-    glVertex2f( 1.5,  -2);
+    glVertex2f(1.5, 2.3);
+    glVertex2f(1.5, -2);
     //Rad 1
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(-2.5, -2);
     glVertex2f(-2.5, -1);
     glVertex2f(-1.5, -1);
     glVertex2f(-1.5, -2);
     //Rad2
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(-2.5, 1);
     glVertex2f(-2.5, 2);
     glVertex2f(-1.5, 2);
     glVertex2f(-1.5, 1);
     //Rad3
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(1.5, 1);
     glVertex2f(1.5, 2);
     glVertex2f(2.5, 2);
     glVertex2f(2.5, 1);
     //Rad4
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(1.5, -2);
     glVertex2f(1.5, -1);
     glVertex2f(2.5, -1);
     glVertex2f(2.5, -2);
     glEnd();
     //Spitze
+    glColor3f(0.5, 0.0, 0.0);
     glBegin(GL_TRIANGLES);
     glVertex2f(-1.5, -2);
-    glVertex2f(0,  -3.5);
-    glVertex2f(1.5,  -2);
+    glVertex2f(0, -3.5);
+    glVertex2f(1.5, -2);
     glEnd();
     //glutSolidSphere(2, 20, 10);
 
@@ -535,12 +617,18 @@ void display() {
         counts2 = 0;
 
 
+    if (rota2)
+    {
+        if (ct2 < 1)
+            angle2 -= 0.18 + anglespeed2;
+    }
+
+
     //glLoadIdentity();
     if (counts2 == 0)
     {
         bt2 = bezierPointspanitik2(ct2, ctrlpoints9);
-        if (ct2 > 0)
-            angle -= 0.7;
+      
 
         if (speed2 > 0.025)
         {
@@ -554,12 +642,20 @@ void display() {
 
 
     if (counts2 == 1)
+    {
         bt2 = bezierPointspanitik2(ct2, ctrlpoints10);
-
+        rota2 = false;
+    }
 
     if (counts2 == 2)
     {
         bt2 = bezierPointspanitik2(ct2, ctrlpoints11);
+
+        rota2 = true;
+        if (speed2 == 0)
+        {
+            rota2 = false;
+        }
 
         if (speed2 > 0.025)
         {
@@ -575,6 +671,12 @@ void display() {
     if (counts2 == 3)
     {
         bt2 = bezierPointspanitik2(ct2, ctrlpoints12);
+        rota2 = true;
+
+        if (speed2 == 0)
+        {
+            rota2 = false;
+        }
 
         if (speed2 > 0.025)
         {
@@ -586,11 +688,21 @@ void display() {
     }
 
     if (counts2 == 4)
+    {
         bt2 = bezierPointspanitik2(ct2, ctrlpoints121);
+        rota2 = false;
+    }
 
     if (counts2 == 5)
     {
         bt2 = bezierPointspanitik2(ct2, ctrlpoints122);
+
+        rota2 = true;
+
+        if (speed2 == 0)
+        {
+            rota2 = false;
+        }
         if (speed2 > 0.025)
         {
             bt2.x = bt2.x + 12;
@@ -608,8 +720,8 @@ void display() {
     z = bt2.z;
     cout << bt2.x << "," << bt2.y << "," << bt2.z << endl;
     glTranslatef(x, y, z);
-    glRotatef(angle, 0, 0, 1);
-    glColor3f(0.0, 1.0, 1.0);
+    glRotatef(angle2, 0, 0, 1);
+    glColor3f(0.0, 0.0, 0.5);
 
 
     //Auto
@@ -620,27 +732,32 @@ void display() {
     glVertex2f(1.5, 2.3);
     glVertex2f(1.5, -2);
     //Rad 1
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(-2.5, -2);
     glVertex2f(-2.5, -1);
     glVertex2f(-1.5, -1);
     glVertex2f(-1.5, -2);
     //Rad2
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(-2.5, 1);
     glVertex2f(-2.5, 2);
     glVertex2f(-1.5, 2);
     glVertex2f(-1.5, 1);
     //Rad3
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(1.5, 1);
     glVertex2f(1.5, 2);
     glVertex2f(2.5, 2);
     glVertex2f(2.5, 1);
     //Rad4
+    glColor3f(0.5, 0.5, 0.5);
     glVertex2f(1.5, -2);
     glVertex2f(1.5, -1);
     glVertex2f(2.5, -1);
     glVertex2f(2.5, -2);
     glEnd();
     //Spitze
+    glColor3f(0.0, 0.0, 0.5);
     glBegin(GL_TRIANGLES);
     glVertex2f(-1.5, -2);
     glVertex2f(0, -3.5);
@@ -652,8 +769,8 @@ void display() {
 
     glutSwapBuffers();
 
-  
-   
+
+
 
 }
 
@@ -808,4 +925,5 @@ int main(int argc, char** argv)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
