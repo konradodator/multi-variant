@@ -406,7 +406,7 @@ void display() {
             { 95, 75, 0.0 } };
     drawHaupt(ctrlpoints15);
 
-    //Auﬂenlinie
+    //Au√üenlinie
 
     GLfloat ctrlpoints16[4][3]
         = { { 105, 85, 0.0 },
